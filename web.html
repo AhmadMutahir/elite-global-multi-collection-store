@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EliteGlobal | Professional Multi-Collection Store</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&family=Playfair+Display:ital,wght@0,700;1,700&display=swap" rel="stylesheet">
+    <style>
+        /* ========================================
+           1. CORE DESIGN VARIABLES (The "Brand" Logic)
+           ========================================
+        */
+        :root {
+            --accent: #1a1a1a;
+            --secondary: #7a7a7a;
+            --gold: #d4af37;
+            --bg-light: #fdfdfd;
+            --white: #ffffff;
+            --card-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            --transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg-light);
+            color: var(--accent);
+            line-height: 1.7;
+        }
+
+        /* ========================================
+           2. NAVIGATION & LAYOUT
+           ========================================
+        */
+        nav {
+            height: 90px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 6%;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(20px);
+            position: fixed;
+            top: 0; width: 100%;
+            z-index: 2000;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+        }
+
+        .logo {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.6rem;
+            font-weight: 800;
+            letter-spacing: -1px;
+        }
+
+        .nav-items a {
+            text-decoration: none;
+            color: var(--accent);
+            margin: 0 20px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: var(--transition);
+        }
+
+        .nav-items a:hover { color: var(--gold); }
+
+        /* ========================================
+           3. HERO SECTION
+           ========================================
+        */
+        .hero {
+            height: 90vh;
+            background: linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.2)), 
+                        url('https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?q=80&w=2070');
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: var(--white);
+            margin-bottom: 80px;
+        }
+
+        .hero-content h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(3rem, 8vw, 6rem);
+            margin-bottom: 20px;
+        }
+
+        /* ========================================
+           4. COLLECTION FILTERING SYSTEM
+           ========================================
+        */
+        .filter-container {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        .filter-btn {
+            padding: 12px 25px;
+            margin: 5px;
+            border: 1px solid #ddd;
+            background: none;
+            cursor: pointer;
+            border-radius: 30px;
+            font-weight: 600;
+            transition: var(--transition);
+        }
+
+        .filter-btn.active {
+            background: var(--accent);
+            color: white;
+            border-color: var(--accent);
+        }
+
+        /* ========================================
+           5. DYNAMIC PRODUCT CATALOG
+           ========================================
+        */
+        .catalog-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 4%;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 40px;
+        }
+
+        .product-card {
+            background: var(--white);
+            border-radius: 15px;
+            overflow: hidden;
+            transition: var(--transition);
+            opacity: 0; transform: translateY(20px); /* Animation start */
+        }
+
+        .product-card.visible {
+            opacity: 1; transform: translateY(0);
+        }
+
+        .product-image {
+            height: 450px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .product-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 1.2s ease;
+        }
+
+        .product-card:hover .product-image img {
+            transform: scale(1.1);
+        }
+
+        .product-details {
+            padding: 25px;
+            text-align: center;
+        }
+
+        .tag {
+            font-size: 0.7rem;
+            color: var(--secondary);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .price {
+            font-weight: 800;
+            color: var(--gold);
+            font-size: 1.1rem;
+        }
+
+        /* ========================================
+           6. QUICK VIEW MODAL
+           ========================================
+        */
+        .modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 3000;
+            padding: 20px;
+        }
+
+        .modal-content {
+            background: white;
+            max-width: 1000px;
+            width: 100%;
+            display: flex;
+            border-radius: 20px;
+            overflow: hidden;
+        }
+
+        .modal-img { flex: 1; height: 600px; }
+        .modal-img img { width: 100%; height: 100%; object-fit: cover; }
+        .modal-info { flex: 1; padding: 50px; }
+
+        /* ========================================
+           7. FOOTER
+           ========================================
+        */
+        footer {
+            background: #000;
+            color: white;
+            padding: 100px 6% 40px;
+            margin-top: 100px;
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            gap: 60px;
+            border-bottom: 1px solid #333;
+            padding-bottom: 60px;
+        }
+
+        /* ========================================
+           8. RESPONSIVENESS
+           ========================================
+        */
+        @media (max-width: 992px) {
+            .modal-content { flex-direction: column; }
+            .footer-grid { grid-template-columns: 1fr 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <div class="logo">ELITE GLOBAL</div>
+        <div class="nav-items">
+            <a href="#">New In</a>
+            <a href="#">Collections</a>
+            <a href="#">Journal</a>
+            <a href="#">Sustainability</a>
+        </div>
+        <div class="nav-icons">🔍 👤 👜 (0)</div>
+    </nav>
+
+    <header class="hero">
+        <div class="hero-content">
+            <span style="letter-spacing: 5px; text-transform: uppercase;">A/W 2026 Collection</span>
+            <h1>Elegance Reimagined</h1>
+            <p>High-performance materials meet timeless aesthetic.</p>
+        </div>
+    </header>
+
+    <div class="filter-container">
+        <button class="filter-btn active" onclick="filterCatalog('all', this)">All Collections</button>
+        <button class="filter-btn" onclick="filterCatalog('men', this)">Men's Edit</button>
+        <button class="filter-btn" onclick="filterCatalog('women', this)">Women's Edit</button>
+        <button class="filter-btn" onclick="filterCatalog('tech', this)">Tech & Gear</button>
+        <button class="filter-btn" onclick="filterCatalog('home', this)">Home Objects</button>
+    </div>
+
+    <main class="catalog-container" id="mainCatalog">
+        </main>
+
+    <div class="modal" id="productModal">
+        <div class="modal-content">
+            <div class="modal-img"><img id="modalImg" src="" alt=""></div>
+            <div class="modal-info">
+                <h2 id="modalTitle" class="title" style="font-size: 2rem;"></h2>
+                <p id="modalPrice" class="price" style="font-size: 1.5rem;"></p>
+                <hr style="margin: 20px 0; border: 0; border-top: 1px solid #eee;">
+                <p style="color: #666; margin-bottom: 30px;">This exclusive piece represents the pinnacle of our artisanal craftsmanship. Made from sustainable materials and designed for longevity.</p>
+                <button class="filter-btn active" style="width: 100%; margin: 0;">Add to Cart</button>
+                <button class="filter-btn" style="width: 100%; margin: 10px 0;" onclick="closeModal()">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <div class="footer-grid">
+            <div>
+                <div class="logo" style="margin-bottom: 20px;">ELITE GLOBAL</div>
+                <p style="color: #888;">Defining modern luxury through conscious design and impeccable quality. Shipping worldwide from 20 distribution hubs.</p>
+            </div>
+            <div>
+                <h4 style="margin-bottom: 20px;">Shop</h4>
+                <p style="color: #888;">Men's Collection<br>Women's Collection<br>Accessories<br>Limited Editions</p>
+            </div>
+            <div>
+                <h4 style="margin-bottom: 20px;">Support</h4>
+                <p style="color: #888;">Order Status<br>Shipping & Returns<br>Size Guide<br>Contact Us</p>
+            </div>
+            <div>
+                <h4 style="margin-bottom: 20px;">Connect</h4>
+                <p style="color: #888;">Instagram<br>Pinterest<br>X / Twitter<br>LinkedIn</p>
+            </div>
+        </div>
+        <p style="text-align: center; margin-top: 40px; color: #444;">&copy; 2026 Elite Global Luxury Group. Structured for Performance.</p>
+    </footer>
+
+    <script>
+        /* ========================================
+           9. DYNAMIC DATA (The Catalog Brain)
+           ========================================
+        */
+        const products = [
+            // MEN'S COLLECTION (6)
+            { id: 1, cat: 'men', title: 'Savile Row Coat', price: '$850', img: 'https://images.unsplash.com/photo-1591047139829-d91aecb6caea?w=800' },
+            { id: 2, cat: 'men', title: 'Onyx Oxford Shoes', price: '$320', img: 'https://images.unsplash.com/photo-1543163521-1bf539c55dd2?w=800' },
+            { id: 3, cat: 'men', title: 'Cashmere Knit', price: '$210', img: 'https://images.unsplash.com/photo-1620799140408-edc6dcb6d633?w=800' },
+            { id: 4, cat: 'men', title: 'Heritage Denim', price: '$180', img: 'https://images.unsplash.com/photo-1542272604-787c3835535d?w=800' },
+            { id: 5, cat: 'men', title: 'Aviator Jacket', price: '$1,200', img: 'https://images.unsplash.com/photo-1551028719-00167b16eac5?w=800' },
+            { id: 6, cat: 'men', title: 'Silk Pocket Square', price: '$45', img: 'https://images.unsplash.com/photo-1594938298603-c8148c4dae35?w=800' },
+
+            // WOMEN'S COLLECTION (6)
+            { id: 7, cat: 'women', title: 'Silk Gala Gown', price: '$1,400', img: 'https://images.unsplash.com/photo-1518831959646-742c3a14ebf7?w=800' },
+            { id: 8, cat: 'women', title: 'Ivory Blazer', price: '$450', img: 'https://images.unsplash.com/photo-1548624313-0396c75e4b1a?w=800' },
+            { id: 9, cat: 'women', title: 'Stiletto Boots', price: '$580', img: 'https://images.unsplash.com/photo-1543163521-1bf539c55dd2?w=800' },
+            { id: 10, cat: 'women', title: 'Gold Link Bracelet', price: '$890', img: 'https://images.unsplash.com/photo-1573408302185-9146fe634ad0?w=800' },
+            { id: 11, cat: 'women', title: 'Pleated Midi Skirt', price: '$220', img: 'https://images.unsplash.com/photo-1583337130417-3346a1be7dee?w=800' },
+            { id: 12, cat: 'women', title: 'Velvet Clutch', price: '$190', img: 'https://images.unsplash.com/photo-1566150905458-1bf1fc113f0d?w=800' },
+
+            // TECH & GEAR (6)
+            { id: 13, cat: 'tech', title: 'Titanium Smartwatch', price: '$990', img: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=800' },
+            { id: 14, cat: 'tech', title: 'Acoustic Headphones', price: '$550', img: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=800' },
+            { id: 15, cat: 'tech', title: 'Leather Laptop Sleeve', price: '$150', img: 'https://images.unsplash.com/photo-1525547719571-a2d4ac8945e2?w=800' },
+            { id: 16, cat: 'tech', title: 'Pro Lens Kit', price: '$1,250', img: 'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=800' },
+            { id: 17, cat: 'tech', title: 'Minimalist Keyboard', price: '$280', img: 'https://images.unsplash.com/photo-1587829741301-dc798b83aca2?w=800' },
+            { id: 18, cat: 'tech', title: 'Carbon Fiber Drone', price: '$2,400', img: 'https://images.unsplash.com/photo-1473968512647-3e44a224fe8f?w=800' },
+
+            // HOME OBJECTS (6)
+            { id: 19, cat: 'home', title: 'Marble Vase', price: '$340', img: 'https://images.unsplash.com/photo-1581557991964-125469da3b8a?w=800' },
+            { id: 20, cat: 'home', title: 'Ceramic Table Lamp', price: '$420', img: 'https://images.unsplash.com/photo-1507473885765-e6ed057f782c?w=800' },
+            { id: 21, cat: 'home', title: 'Wool Throw Rug', price: '$670', img: 'https://images.unsplash.com/photo-1583847268964-b28dc2f51ac9?w=800' },
+            { id: 22, cat: 'home', title: 'Scented Candle Set', price: '$95', img: 'https://images.unsplash.com/photo-1603006905003-be475563bc59?w=800' },
+            { id: 23, cat: 'home', title: 'Mid-Century Chair', price: '$1,800', img: 'https://images.unsplash.com/photo-1567538096630-e0c55bd6374c?w=800' },
+            { id: 24, cat: 'home', title: 'Abstract Wall Art', price: '$1,100', img: 'https://images.unsplash.com/photo-1513519245088-0e12902e35ca?w=800' },
+        ];
+
+        /* ========================================
+           10. LOGIC & FUNCTIONALITY
+           ========================================
+        */
+        const catalog = document.getElementById('mainCatalog');
+
+        function renderProducts(filter = 'all') {
+            catalog.innerHTML = '';
+            const filtered = filter === 'all' ? products : products.filter(p => p.cat === filter);
+            
+            filtered.forEach((p, index) => {
+                const card = document.createElement('div');
+                card.className = 'product-card';
+                card.innerHTML = `
+                    <div class="product-image" onclick="openModal(${p.id})">
+                        <img src="${p.img}" alt="${p.title}">
+                    </div>
+                    <div class="product-details">
+                        <span class="tag">${p.cat} Collection</span>
+                        <h3 class="title">${p.title}</h3>
+                        <p class="price">${p.price}</p>
+                    </div>
+                `;
+                catalog.appendChild(card);
+                
+                // Staggered Fade-in Effect
+                setTimeout(() => card.classList.add('visible'), index * 100);
+            });
+        }
+
+        function filterCatalog(category, btn) {
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            renderProducts(category);
+        }
+
+        function openModal(id) {
+            const product = products.find(p => p.id === id);
+            document.getElementById('modalTitle').innerText = product.title;
+            document.getElementById('modalPrice').innerText = product.price;
+            document.getElementById('modalImg').src = product.img;
+            document.getElementById('productModal').style.display = 'flex';
+        }
+
+        function closeModal() {
+            document.getElementById('productModal').style.display = 'none';
+        }
+
+        // Initialize
+        renderProducts();
+    </script>
+</body>
+</html>
